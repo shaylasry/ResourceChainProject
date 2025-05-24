@@ -1,20 +1,19 @@
-using System;
+using DotNetEnv;
 using ResourceChainProject.Interfaces;
 using ResourceChainProject.Models;
 using ResourceChainProject.Storages;
 using ResourceChainProject.Nodes;
 using ResourceChainProject.Chains;
-using DotNetEnv;
 
-public static class ExchangeRateResource
+public class ChainResourceManager
 {
-    private static readonly IChainResource<ExchangeRatesResponse> _instance;
+    private readonly IChainResource<ExchangeRatesResponse> _chain;
 
-    private const int MemoryExpirationSeconds = 3600;
-    private const int FileExpirationSeconds = 14400;
+    private const int MemoryExpirationSeconds = 10;
+    private const int FileExpirationSeconds = 20;
     private const string JsonFilePath = "exchange_rates.json";
 
-    static ExchangeRateResource()
+    public ChainResourceManager()
     {
         Env.Load();
 
@@ -29,12 +28,12 @@ public static class ExchangeRateResource
         var memoryStorage = new MemoryStorage<ExchangeRatesResponse>(
             TimeSpan.FromSeconds(MemoryExpirationSeconds));
 
-        var node3 = new ResourceNode<ExchangeRatesResponse>(webServiceStorage);
-        var node2 = new ResourceNode<ExchangeRatesResponse>(fileSystemStorage) { Next = node3 };
-        var node1 = new ResourceNode<ExchangeRatesResponse>(memoryStorage) { Next = node2 };
+        var node3 = new ChainResourceNode<ExchangeRatesResponse>(webServiceStorage);
+        var node2 = new ChainResourceNode<ExchangeRatesResponse>(fileSystemStorage) { Next = node3 };
+        var node1 = new ChainResourceNode<ExchangeRatesResponse>(memoryStorage) { Next = node2 };
 
-        _instance = new ChainResource<ExchangeRatesResponse>(node1);
+        _chain = new ChainResource<ExchangeRatesResponse>(node1);
     }
 
-    public static IChainResource<ExchangeRatesResponse> Instance => _instance;
+    public Task<ExchangeRatesResponse?> GetRatesAsync() => _chain.GetValue();
 }

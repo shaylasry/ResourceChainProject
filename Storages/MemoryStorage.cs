@@ -4,7 +4,7 @@ using ResourceChainProject.Interfaces;
 
 namespace ResourceChainProject.Storages
 {
-    public class MemoryStorage<T> : IReadableStorage<T>, IWritableStorage<T>
+    public class MemoryStorage<T> :  IWritableStorage<T>
     {
         private T? _value;
         private DateTime? _expirationTime;

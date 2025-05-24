@@ -1,12 +1,9 @@
-using System;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
 using ResourceChainProject.Interfaces;
 
 namespace ResourceChainProject.Storages
 {
-    public class FileSystemStorage<T> : IReadableStorage<T>, IWritableStorage<T>
+    public class FileSystemStorage<T> : IWritableStorage<T>
     {
         private readonly string _filePath;
         private readonly TimeSpan _expiration;

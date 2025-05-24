@@ -3,12 +3,12 @@ using ResourceChainProject.Interfaces;
 
 namespace ResourceChainProject.Nodes
 {
-    public class ResourceNode<T> : IResourceNode<T>
+    public class ChainResourceNode<T> : IResourceNode<T>
     {
         public IReadableStorage<T> Storage { get; }
         public IResourceNode<T>? Next { get; set; }
 
-        public ResourceNode(IReadableStorage<T> storage)
+        public ChainResourceNode(IReadableStorage<T> storage)
         {
             Storage = storage;
         }
