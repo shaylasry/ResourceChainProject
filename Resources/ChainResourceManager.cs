@@ -8,12 +8,9 @@ using ResourceChainProject.Chains;
 public class ChainResourceManager
 {
     private readonly IChainResource<ExchangeRatesResponse> _chain;
-
-    private const int MemoryExpirationSeconds = 10;
-    private const int FileExpirationSeconds = 20;
     private const string JsonFilePath = "exchange_rates.json";
 
-    public ChainResourceManager()
+    public ChainResourceManager(TimeSpan memoryExpiration, TimeSpan fileExpiration)
     {
         Env.Load();
 
@@ -24,9 +21,9 @@ public class ChainResourceManager
 
         var webServiceStorage = new WebServiceStorage<ExchangeRatesResponse>(url);
         var fileSystemStorage = new FileSystemStorage<ExchangeRatesResponse>(
-            JsonFilePath, TimeSpan.FromSeconds(FileExpirationSeconds));
+            JsonFilePath, fileExpiration);
         var memoryStorage = new MemoryStorage<ExchangeRatesResponse>(
-            TimeSpan.FromSeconds(MemoryExpirationSeconds));
+            memoryExpiration);
 
         var node3 = new ChainResourceNode<ExchangeRatesResponse>(webServiceStorage);
         var node2 = new ChainResourceNode<ExchangeRatesResponse>(fileSystemStorage) { Next = node3 };

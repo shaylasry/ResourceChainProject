@@ -10,23 +10,21 @@ class Program
         await Task.Delay(TimeSpan.FromSeconds(5));
         await RunTest("🧪 [Run #2] Expect: Memory HIT");
 
-        await Task.Delay(TimeSpan.FromSeconds(6)); // 11 total
+        await Task.Delay(TimeSpan.FromSeconds(6));
         await RunTest("🧪 [Run #3] Expect: FileSystem HIT, then Memory re-write");
 
-        await Task.Delay(TimeSpan.FromSeconds(10)); // 21 total
+        await Task.Delay(TimeSpan.FromSeconds(10));
         await RunTest("🧪 [Run #4] Expect: WebService HIT again (all expired)");
+
 
         try
         {
             File.Delete("exchange_rates.json");
-            Console.WriteLine("🗑️ Deleted exchange_rates.json to simulate missing FileStorage");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"⚠️ Failed to delete JSON: {ex.Message}");
         }
-
-        await RunTest("🧪 [Run #5] File deleted – expect: Memory expired → skip file → go to WebService");
     }
 
     static async Task RunTest(string label)
@@ -37,7 +35,7 @@ class Program
 
         try
         {
-            var rates = await ChainResourceHolder.ExchangeRates.GetRatesAsync();
+            var rates = await ChainResourceHolder.TestChainResourceManager.GetRatesAsync();
 
             Console.WriteLine($"✅ Base: {rates.Base}, Timestamp: {DateTimeOffset.FromUnixTimeSeconds(rates.Timestamp)}");
 
@@ -49,7 +47,7 @@ class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Exception: {ex.Message}");
+            Console.WriteLine($"Exception: {ex.Message}");
         }
     }
 }
