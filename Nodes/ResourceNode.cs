@@ -18,7 +18,7 @@ namespace ResourceChainProject.Nodes
             Console.WriteLine($"[DEBUG] Visiting node: {Storage.GetType().Name}");
         #endif
 
-            if (Storage.HasValue && !Storage.IsExpired)
+            if (!Storage.IsExpired)
             {
         #if DEBUG
                 Console.WriteLine($"[DEBUG] Value found in: {Storage.GetType().Name}");

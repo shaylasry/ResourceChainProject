@@ -31,7 +31,7 @@ namespace ResourceChainProject.Storages
 
         public async Task<T?> Read()
         {
-            if (!HasValue || IsExpired)
+            if (IsExpired)
                 return default;
 
             try

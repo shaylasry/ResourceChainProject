@@ -17,7 +17,7 @@ namespace ResourceChainProject.Storages
 
         public bool HasValue => _value is not null;
 
-        public bool IsExpired => !_expirationTime.HasValue || DateTime.UtcNow > _expirationTime.Value;
+        public bool IsExpired => !HasValue || !_expirationTime.HasValue || DateTime.UtcNow > _expirationTime.Value;
 
         public Task<T?> Read()
         {
