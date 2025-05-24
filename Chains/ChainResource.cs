@@ -14,7 +14,7 @@ namespace ResourceChainProject.Chains
 
         public async Task<T?> GetValue()
         {
-            return await _head.GetValue() ?? throw new InvalidOperationException("No value available in the resource chain");
+            return await _head.GetValue();
         }
     }
 } 

@@ -1,35 +1,91 @@
-using System;
-using System.Threading.Tasks;
 using ResourceChainProject.Interfaces;
 
 namespace ResourceChainProject.Storages
 {
-    public class MemoryStorage<T> :  IWritableStorage<T>
+    public class MemoryStorage<T> : IWritableStorage<T>
     {
         private T? _value;
-        private DateTime? _expirationTime;
-        private readonly TimeSpan _expiration;
+        private DateTime? _lastUpdated;
+        private readonly TimeSpan _expirationInterval;
 
-        public MemoryStorage(TimeSpan expiration)
+        private readonly ReaderWriterLockSlim _lock = new();
+
+        public MemoryStorage(TimeSpan expirationInterval)
         {
-            _expiration = expiration;
+            _expirationInterval = expirationInterval;
         }
 
-        public bool HasValue => _value is not null;
+        public bool HasValue
+        {
+            get
+            {
+                _lock.EnterReadLock();
+                try
+                {
+                    return _value is not null;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
+            }
+        }
 
-        public bool IsExpired => !HasValue || !_expirationTime.HasValue || DateTime.UtcNow > _expirationTime.Value;
+        public bool IsExpired
+        {
+            get
+            {
+                _lock.EnterReadLock();
+                try
+                {
+                    return _value is null
+                        || !_lastUpdated.HasValue
+                        || DateTime.UtcNow > _lastUpdated.Value.Add(_expirationInterval);
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
+                }
+            }
+        }
 
         public Task<T?> Read()
         {
-            if (IsExpired) return Task.FromResult<T?>(default);
-            return Task.FromResult(_value);
-        }
+            _lock.EnterReadLock();
+            try
+            {
+                if (_value is null || !_lastUpdated.HasValue || DateTime.UtcNow > _lastUpdated.Value.Add(_expirationInterval))
+                    return Task.FromResult<T?>(default);
 
+                return Task.FromResult(_value);
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+        
         public Task Write(T value)
         {
-            _value = value;
-            _expirationTime = DateTime.UtcNow.Add(_expiration);
+            var timestamp = DateTime.UtcNow;
+
+            _lock.EnterWriteLock();
+            try
+            {
+                if (_lastUpdated.HasValue && timestamp <= _lastUpdated.Value)
+                {
+                    return Task.CompletedTask;
+                }
+
+                _value = value;
+                _lastUpdated = timestamp;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+
             return Task.CompletedTask;
         }
     }
-} 
+}
