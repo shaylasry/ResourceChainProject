@@ -14,8 +14,8 @@ public class ChainResourceManager
     {
         Env.Load();
 
-        var apiKey = Environment.GetEnvironmentVariable("API_KEY")
-            ?? throw new InvalidOperationException("API_KEY not found");
+        var apiKey = Environment.GetEnvironmentVariable("API_ID")
+            ?? throw new InvalidOperationException("API_ID not found");
 
         var url = $"https://openexchangerates.org/api/latest.json?app_id={apiKey}";
 
